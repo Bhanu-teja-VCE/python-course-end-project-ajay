@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hostel Room Allocation Management System - Technical Case Study & Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #7c3aed;
+      --primary-light: #8b5cf6;
+      --primary-dark: #5b21b6;
+      --accent: #a855f7;
+      --bg: #0c0914;
+      --surface: #171126;
+      --surface-card: #231b38;
+      --surface-border: #3b2d5a;
+      --text-main: #f5f3ff;
+      --text-muted: #a79ec0;
+      --success: #10b981;
+      --code-bg: #130e20;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.75;
+      padding: 0;
+    }
+    header.hero {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.2) 0%, rgba(168, 85, 247, 0.12) 100%), var(--surface);
+      border-bottom: 1px solid var(--surface-border);
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+    .badge-bar {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-primary { background: rgba(124, 58, 237, 0.25); color: #ddd6fe; border: 1px solid rgba(139, 92, 246, 0.4); }
+    .badge-accent { background: rgba(168, 85, 247, 0.25); color: #e9d5ff; border: 1px solid rgba(168, 85, 247, 0.4); }
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+    h1 {
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, #ffffff, #ede9fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 750px;
+      margin: 0 auto 2rem auto;
+    }
+    .meta-box {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+    .meta-box span strong { color: var(--text-main); }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+    .blog-nav {
+      position: sticky;
+      top: 1rem;
+      z-index: 100;
+      background: rgba(23, 17, 38, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      gap: 1.25rem;
+      overflow-x: auto;
+      margin-bottom: 2.5rem;
+    }
+    .blog-nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: color 0.2s;
+    }
+    .blog-nav a:hover {
+      color: var(--primary-light);
+    }
+    section {
+      margin-bottom: 3.5rem;
+      scroll-margin-top: 5rem;
+    }
+    h2 {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border-bottom: 2px solid var(--surface-border);
+      padding-bottom: 0.5rem;
+    }
+    h3 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: #f5f3ff;
+      margin: 1.75rem 0 0.75rem 0;
+    }
+    p {
+      color: #ddd6fe;
+      margin-bottom: 1.25rem;
+      font-size: 1.025rem;
+    }
+    .card {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin: 1.5rem 0;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .feature-card {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary-light);
+    }
+    .feature-card h4 {
+      color: #c084fc;
+      font-size: 1.15rem;
+      margin-bottom: 0.5rem;
+    }
+    .feature-card p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--surface-border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      color: #ede9fe;
+      margin: 1.25rem 0;
+    }
+    code {
+      font-family: 'Fira Code', monospace;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: #c084fc;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background: var(--surface-card);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--surface-border);
+    }
+    th, td {
+      padding: 0.9rem 1.2rem;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-border);
+    }
+    th {
+      background: rgba(255, 255, 255, 0.04);
+      color: #faf5ff;
+      font-weight: 600;
+    }
+    td {
+      color: #ddd6fe;
+      font-size: 0.95rem;
+    }
+    .flow-diagram {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      margin: 2rem 0;
+    }
+    .flow-step {
+      display: inline-block;
+      background: rgba(124, 58, 237, 0.2);
+      border: 1px solid var(--primary-light);
+      padding: 0.85rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #ddd6fe;
+      margin: 0.5rem;
+    }
+    .flow-arrow {
+      color: var(--accent);
+      font-size: 1.25rem;
+      margin: 0 0.25rem;
+    }
+    footer {
+      border-top: 1px solid var(--surface-border);
+      padding: 3rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      background: var(--surface);
+    }
+    footer a {
+      color: var(--primary-light);
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="badge-bar">
+      <span class="badge badge-primary">Student Project</span>
+      <span class="badge badge-accent">Python 3.14</span>
+      <span class="badge badge-success">Hostel ERP & Vacancy Engine</span>
+    </div>
+    <h1>Hostel Room Allocation Management System</h1>
+    <p class="subtitle">A comprehensive engineering study of multi-tier accommodation management, vacancy computation algorithms, and autonomous bed allocation.</p>
+    <div class="meta-box">
+      <span>Developer: <strong>Ajay</strong></span>
+      <span>Course Mapping: <strong>CO1, CO3, CO4</strong></span>
+      <span>Program Mapping: <strong>PO1, PO2, PO3, PO5</strong></span>
+      <span>Repository: <a href="https://github.com/Bhanu-teja-VCE/python-course-end-project-ajay" target="_blank" style="color:var(--primary-light); text-decoration: none;"><strong>python-course-end-project-ajay</strong></a></span>
+    </div>
+  </header>
+
+  <div class="container">
+    <nav class="blog-nav">
+      <a href="#overview">1. Overview</a>
+      <a href="#architecture">2. Architecture</a>
+      <a href="#features">3. Core Features</a>
+      <a href="#logic">4. Underlying Logic</a>
+      <a href="#persistence">5. Data Model</a>
+      <a href="#walkthrough">6. Code Walkthrough</a>
+      <a href="#execution">7. How to Run</a>
+      <a href="#attainment">8. CO/PO Mapping</a>
+    </nav>
+
+    <!-- SECTION 1 -->
+    <section id="overview">
+      <h2>1. Problem Statement & Project Overview</h2>
+      <p>
+        Academic campuses, colleges, and training facilities accommodate hundreds of resident students annually. Traditional manual allocation leads to frequent double-bookings, unmonitored room vacancies, slow student query lookups, and administrative difficulties when students vacate or change rooms during semester transitions.
+      </p>
+      <p>
+        The <strong>Hostel Room Allocation Management System</strong> developed by Ajay provides an automated solution for residential facility managers. The system maintains capacity limits per room, prevents double allocations, offers both manual room selection and automatic first-available bed assignment, tracks real-time vacancies, and facilitates fast search by student roll number.
+      </p>
+      <div class="grid-2">
+        <div class="feature-card">
+          <h4>Dual-Mode Room Allocation</h4>
+          <p>Enables direct room assignment or autonomous fallback allocation that claims the first available bed across all configured rooms.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Anti-Duplicate Allocation Guard</h4>
+          <p>Global lookup ensures a student cannot be allocated more than one room simultaneously across the residential complex.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2 -->
+    <section id="architecture">
+      <h2>2. System Architecture & Workflow</h2>
+      <p>
+        The system is organized around a hierarchical dictionary persisted in <code>hostel_data.json</code>. Each room acts as an independent entity maintaining its target capacity and an active resident roster.
+      </p>
+
+      <div class="flow-diagram">
+        <div class="flow-step">Student & Room Selection</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">Uniqueness & Capacity Guard</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">In-Memory Roster Update</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">JSON Database</div>
+      </div>
+
+      <div class="card">
+        <h3>Core Workflow:</h3>
+        <ol style="margin-left: 1.5rem; color: #ddd6fe;">
+          <li style="margin-bottom: 0.5rem;"><strong>Seed Configuration:</strong> If no existing database is found, the system seeds 5 double-occupancy rooms (101-105, capacity 2) and 3 triple-occupancy rooms (201-203, capacity 3).</li>
+          <li style="margin-bottom: 0.5rem;"><strong>Allocation Verification:</strong> Verifies that the student's roll number is not already assigned to any room across the entire facility.</li>
+          <li style="margin-bottom: 0.5rem;"><strong>Assignment:</strong> If manual room number is provided, verifies room existence and bed capacity. If empty input, auto-assigns the first room with available capacity.</li>
+          <li style="margin-bottom: 0.5rem;"><strong>Deallocation & Search:</strong> Allows vacating a room by roll number and provides instant student location lookup.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- SECTION 3 -->
+    <section id="features">
+      <h2>3. Feature Breakdown</h2>
+      <div class="grid-2">
+        <div class="feature-card">
+          <h4>1. Complete Hostel Occupancy View</h4>
+          <p>Renders an overview of every room, current occupancy vs total capacity, and an inline list of resident student names.</p>
+        </div>
+        <div class="feature-card">
+          <h4>2. Vacancy Analytics Engine</h4>
+          <p>Calculates vacant beds per room (<code>capacity - current_occupants</code>) and summarizes gross available beds.</p>
+        </div>
+        <div class="feature-card">
+          <h4>3. Dynamic Facility Expansion</h4>
+          <p>Allows hostel wardens to register new rooms with custom bed capacities at any time.</p>
+        </div>
+        <div class="feature-card">
+          <h4>4. Student Directory Search</h4>
+          <p>Instantly maps any roll number to student name, academic branch, and assigned room number.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4 -->
+    <section id="logic">
+      <h2>4. Algorithmic Deep Dive & Underlying Logic</h2>
+
+      <h3>A. Global Student Uniqueness Scanner</h3>
+      <p>
+        To prevent double-booking, the helper function <code>find_student()</code> scans the room hierarchy:
+      </p>
+      <pre><code>def find_student(data, roll):
+    for room_no, room in data["rooms"].items():
+        for s in room["students"]:
+            if s["roll"] == roll:
+                return room_no, s
+    return None, None</code></pre>
+      <p>Returning both the room number and the matched student reference allows this function to power both duplicate checking, vacating, and directory search.</p>
+
+      <h3>B. Autonomous Fallback Allocation</h3>
+      <p>
+        When an administrator leaves the room selection blank (presses Enter), the system iterates through rooms until it discovers one with open beds:
+      </p>
+      <pre><code>if not room_no:
+    for r, room in data["rooms"].items():
+        if len(room["students"]) < room["capacity"]:
+            room_no = r
+            break
+    else:
+        print("No vacant rooms available.")
+        return</code></pre>
+
+      <h3>C. Dynamic Bed Vacancy Computation</h3>
+      <p>
+        Vacancies are calculated on the fly without maintaining redundant counter variables that could risk state drift:
+      </p>
+      <pre><code>total = 0
+for room_no, room in data["rooms"].items():
+    free = room["capacity"] - len(room["students"])
+    if free > 0:
+        print(f"Room {room_no}: {free} bed(s) free")
+        total += free
+print(f"Total vacant beds: {total}")</code></pre>
+    </section>
+
+    <!-- SECTION 5 -->
+    <section id="persistence">
+      <h2>5. Data Model & Storage Schema</h2>
+      <p>
+        The complete hostel structure is persisted in <code>hostel_data.json</code>:
+      </p>
+      <pre><code>{
+    "rooms": {
+        "101": {
+            "capacity": 2,
+            "students": [
+                {
+                    "roll": "2451-22-733-001",
+                    "name": "Karthik Reddy",
+                    "branch": "CSE"
+                }
+            ]
+        },
+        "102": {
+            "capacity": 2,
+            "students": []
+        },
+        "201": {
+            "capacity": 3,
+            "students": []
+        }
+    }
+}</code></pre>
+    </section>
+
+    <!-- SECTION 6 -->
+    <section id="walkthrough">
+      <h2>6. Comprehensive Code Walkthrough</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Function</th>
+            <th>Parameters</th>
+            <th>Primary Responsibility</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>load_data()</code></td>
+            <td>None</td>
+            <td>Deserializes <code>hostel_data.json</code> or generates default rooms 101-105 & 201-203.</td>
+          </tr>
+          <tr>
+            <td><code>save_data(data)</code></td>
+            <td><code>data: dict</code></td>
+            <td>Writes the entire room dictionary state to disk with 4-space JSON formatting.</td>
+          </tr>
+          <tr>
+            <td><code>add_room(data)</code></td>
+            <td><code>data: dict</code></td>
+            <td>Registers a new room number with custom integer capacity after checking for collisions.</td>
+          </tr>
+          <tr>
+            <td><code>view_rooms(data)</code></td>
+            <td><code>data: dict</code></td>
+            <td>Renders tabular view of all rooms with occupancy rates and resident names.</td>
+          </tr>
+          <tr>
+            <td><code>view_vacancies(data)</code></td>
+            <td><code>data: dict</code></td>
+            <td>Calculates unoccupied beds per room and cumulative vacant bed counts.</td>
+          </tr>
+          <tr>
+            <td><code>find_student(data, roll)</code></td>
+            <td><code>data, roll</code></td>
+            <td>Helper function scanning rooms to return <code>(room_no, student)</code>.</td>
+          </tr>
+          <tr>
+            <td><code>allocate_room(data)</code></td>
+            <td><code>data: dict</code></td>
+            <td>Enforces uniqueness, handles manual or auto allocation, validates capacity limits.</td>
+          </tr>
+          <tr>
+            <td><code>vacate_room(data)</code></td>
+            <td><code>data: dict</code></td>
+            <td>Removes student from room roster and updates JSON store.</td>
+          </tr>
+          <tr>
+            <td><code>search_student(data)</code></td>
+            <td><code>data: dict</code></td>
+            <td>Finds student by roll number and displays branch and room allocation.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- SECTION 7 -->
+    <section id="execution">
+      <h2>7. How to Run & CLI Demo</h2>
+      <pre><code># 1. Clone or navigate to the directory
+cd 5_Ajay_Hostel_Room_Allocation
+
+# 2. Execute the hostel management system
+python hostel_system.py</code></pre>
+
+      <div class="card">
+        <h3>Sample Terminal Interaction:</h3>
+        <pre><code>===== HOSTEL ROOM ALLOCATION MANAGEMENT =====
+1. View all rooms
+2. View vacancies
+3. Add room
+4. Allocate room to student
+5. Vacate room
+6. Search student
+7. Exit
+Enter choice: 4
+Enter student roll number: 245122733001
+Enter student name: Karthik Reddy
+Enter branch: CSE
+Enter room number (or press Enter for auto allocation): 
+Karthik Reddy allocated to room 101.
+
+===== HOSTEL ROOM ALLOCATION MANAGEMENT =====
+Enter choice: 6
+Enter student roll number: 245122733001
+Karthik Reddy (CSE) is in room 101.</code></pre>
+      </div>
+    </section>
+
+    <!-- SECTION 8 -->
+    <section id="attainment">
+      <h2>8. Academic CO & PO Attainment Matrix</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Outcome</th>
+            <th>Description & Application in this Project</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>CO1</strong></td>
+            <td>Understand and implement fundamental constructs, nested loops, and conditional branching. Applied in nested iterations across room and student rosters.</td>
+          </tr>
+          <tr>
+            <td><strong>CO3</strong></td>
+            <td>Application of complex nested collections (dictionaries containing lists of student objects). Used to represent multi-tenant accommodation.</td>
+          </tr>
+          <tr>
+            <td><strong>CO4</strong></td>
+            <td>Defensive programming and boundary validation. Enforces room capacity limits and prevents duplicate room allocation.</td>
+          </tr>
+          <tr>
+            <td><strong>PO1, PO2</strong></td>
+            <td>Engineering knowledge & Problem analysis: Formulation of residential allocation logic and automatic capacity distribution.</td>
+          </tr>
+          <tr>
+            <td><strong>PO3, PO5</strong></td>
+            <td>Design/Development of solutions & Modern tool usage: Building an interactive terminal application backed by persistent storage.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>Hostel Room Allocation Management System &bull; Developed by <strong>Ajay</strong></p>
+    <p>Repository: <a href="https://github.com/Bhanu-teja-VCE/python-course-end-project-ajay" target="_blank">github.com/Bhanu-teja-VCE/python-course-end-project-ajay</a></p>
+  </footer>
+
+</body>
+</html>
